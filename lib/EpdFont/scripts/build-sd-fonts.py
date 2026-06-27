@@ -296,6 +296,15 @@ def main():
         "--output-dir", default=str(DEFAULT_OUTPUT), help="Output directory for .cpfont files"
     )
     parser.add_argument("--only", help="Comma-separated family names to build (default: all)")
+    parser.add_argument(
+        "--profile",
+        action="append",
+        help=(
+            "Build only families with this profile. Can be passed multiple times "
+            "(for example: --profile reader --profile ui). Families without a "
+            "profile are treated as 'reader'."
+        ),
+    )
     parser.add_argument("--manifest", action="store_true", help="Also generate fonts.json manifest")
     parser.add_argument("--base-url", default="", help="Base URL for manifest (required with --manifest)")
     parser.add_argument(
@@ -306,6 +315,11 @@ def main():
         help="Max parallel jobs (default: number of families)"
     )
     parser.add_argument("--clean", action="store_true", help="Clean output directory before building")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Parse config, apply filters, print selected families, then exit without downloads or builds",
+    )
     parser.add_argument(
         "--verbose", "-v", action="store_true",
         help="Stream child process output in real time (useful for debugging timeouts)"
@@ -352,6 +366,24 @@ def main():
         if not families:
             print("ERROR: no matching families after --only filter", file=sys.stderr)
             sys.exit(1)
+
+    if args.profile:
+        profiles = {p.strip() for item in args.profile for p in item.split(",") if p.strip()}
+        families = [f for f in families if f.get("profile", "reader") in profiles]
+        if not families:
+            print(
+                f"ERROR: no families match profile(s): {', '.join(sorted(profiles))}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    if args.dry_run:
+        print(f"Selected {len(families)} font families:")
+        for family in families:
+            profile = family.get("profile", "reader")
+            sizes = ",".join(str(s) for s in family.get("sizes", []))
+            print(f"  {family['name']} [{profile}] sizes={sizes}")
+        return
 
     output_base = Path(args.output_dir)
 

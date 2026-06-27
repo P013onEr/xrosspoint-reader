@@ -115,6 +115,26 @@ Combine presets with commas: `--intervals latin-ext,greek,cyrillic`
 You can also specify arbitrary Unicode ranges directly:
 `--intervals latin-ext,(0x2100-0x214F)`
 
+### CJK font build profiles
+
+The repository font config separates generated fonts by profile:
+
+- `reader` — selectable reading fonts, usually generated at multiple sizes
+- `ui` — fixed-size UI fonts used by firmware UI rendering
+
+Build only reading fonts:
+
+    python3 lib/EpdFont/scripts/build-sd-fonts.py --profile reader
+
+Build only UI fonts:
+
+    python3 lib/EpdFont/scripts/build-sd-fonts.py --profile ui
+
+The CJK presets are:
+
+- `cjk-ui` — Basic Latin, CJK punctuation, kana, Hangul, CJK ideographs, compatibility ideographs, and fullwidth forms
+- `cjk-reading` — `cjk-ui` plus built-in Latin/European coverage and common ebook symbol blocks
+
 To list all presets with codepoint counts:
 
     python3 lib/EpdFont/scripts/fontconvert_sdcard.py --list-presets
