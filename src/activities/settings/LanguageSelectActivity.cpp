@@ -9,6 +9,7 @@
 #include "CrossPointSettings.h"
 #include "I18nKeys.h"
 #include "MappedInputManager.h"
+#include "SdCardFontSystem.h"
 #include "fontIds.h"
 
 void LanguageSelectActivity::onEnter() {
@@ -67,6 +68,7 @@ void LanguageSelectActivity::handleSelection() {
   {
     RenderLock lock(*this);
     I18N.setLanguage(static_cast<Language>(langIndex));
+    sdFontSystem.ensureUiLoaded(renderer);
   }
 
   SETTINGS.language = langIndex;

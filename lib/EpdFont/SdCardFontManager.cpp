@@ -43,42 +43,71 @@ bool SdCardFontManager::loadFamily(const SdCardFontFamilyInfo& family, GfxRender
     return false;
   }
 
-  auto* font = new (std::nothrow) SdCardFont();
-  if (!font) {
-    LOG_ERR("SDMGR", "Failed to allocate SdCardFont for %s", selected->path.c_str());
-    return false;
-  }
-
-  if (!font->load(selected->path.c_str())) {
-    LOG_ERR("SDMGR", "Failed to load %s", selected->path.c_str());
-    delete font;
-    return false;
-  }
-
-  int fontId = computeFontId(font->contentHash(), family.name.c_str(), selected->pointSize);
-  // Guard against collision with built-in font IDs (astronomically unlikely
-  // with FNV-1a hashes, but provides a safety net)
-  if (renderer.getFontMap().count(fontId) != 0) {
-    LOG_ERR("SDMGR", "Font ID %d collides with existing font, skipping %s", fontId, selected->path.c_str());
-    delete font;
-    return false;
-  }
-  renderer.registerSdCardFont(fontId, font);
-  loaded_.push_back({font, fontId, selected->pointSize});
-
-  LOG_DBG("SDMGR", "Loaded %s size=%u id=%d styles=%u (sizeEnum=%u)", selected->path.c_str(), selected->pointSize,
-          fontId, font->styleCount(), fontSizeEnum);
-
-  EpdFontFamily fontFamily(font->getEpdFont(0), font->getEpdFont(1), font->getEpdFont(2), font->getEpdFont(3));
-  renderer.insertFont(fontId, fontFamily);
-
+  if (!loadFile(family, *selected, renderer)) return false;
   loadedFamilyName_ = family.name;
   loadedPointSize_ = selected->pointSize;
   return true;
 }
 
+bool SdCardFontManager::loadFamilyPointSizes(const SdCardFontFamilyInfo& family, GfxRenderer& renderer,
+                                             const uint8_t* pointSizes, size_t pointSizeCount) {
+  if (!loadedFamilyName_.empty()) {
+    unloadAll(renderer);
+  }
+
+  for (size_t i = 0; i < pointSizeCount; i++) {
+    const SdCardFontFileInfo* selected = family.findFile(pointSizes[i]);
+    if (!selected) {
+      LOG_ERR("SDMGR", "Family %s missing size %u", family.name.c_str(), pointSizes[i]);
+      unloadAll(renderer);
+      return false;
+    }
+    if (!loadFile(family, *selected, renderer)) {
+      unloadAll(renderer);
+      return false;
+    }
+  }
+
+  loadedFamilyName_ = family.name;
+  loadedPointSize_ = pointSizeCount > 0 ? pointSizes[0] : 0;
+  return true;
+}
+
+bool SdCardFontManager::loadFile(const SdCardFontFamilyInfo& family, const SdCardFontFileInfo& selected,
+                                 GfxRenderer& renderer) {
+  auto* font = new (std::nothrow) SdCardFont();
+  if (!font) {
+    LOG_ERR("SDMGR", "Failed to allocate SdCardFont for %s", selected.path.c_str());
+    return false;
+  }
+
+  if (!font->load(selected.path.c_str())) {
+    LOG_ERR("SDMGR", "Failed to load %s", selected.path.c_str());
+    delete font;
+    return false;
+  }
+
+  int fontId = computeFontId(font->contentHash(), family.name.c_str(), selected.pointSize);
+  // Guard against collision with built-in font IDs (astronomically unlikely
+  // with FNV-1a hashes, but provides a safety net)
+  if (renderer.getFontMap().count(fontId) != 0) {
+    LOG_ERR("SDMGR", "Font ID %d collides with existing font, skipping %s", fontId, selected.path.c_str());
+    delete font;
+    return false;
+  }
+  renderer.registerSdCardFont(fontId, font);
+  loaded_.push_back({font, fontId, selected.pointSize});
+
+  LOG_DBG("SDMGR", "Loaded %s size=%u id=%d styles=%u", selected.path.c_str(), selected.pointSize, fontId,
+          font->styleCount());
+
+  EpdFontFamily fontFamily(font->getEpdFont(0), font->getEpdFont(1), font->getEpdFont(2), font->getEpdFont(3));
+  renderer.insertFont(fontId, fontFamily);
+
+  return true;
+}
+
 void SdCardFontManager::unloadAll(GfxRenderer& renderer) {
-  renderer.clearSdCardFonts();
   for (auto& lf : loaded_) {
     renderer.removeFont(lf.fontId);
     delete lf.font;
@@ -91,4 +120,12 @@ void SdCardFontManager::unloadAll(GfxRenderer& renderer) {
 int SdCardFontManager::getFontId(const std::string& familyName) const {
   if (familyName != loadedFamilyName_ || loaded_.empty()) return 0;
   return loaded_.front().fontId;
+}
+
+int SdCardFontManager::getFontId(const std::string& familyName, uint8_t pointSize) const {
+  if (familyName != loadedFamilyName_) return 0;
+  for (const auto& lf : loaded_) {
+    if (lf.size == pointSize) return lf.fontId;
+  }
+  return 0;
 }

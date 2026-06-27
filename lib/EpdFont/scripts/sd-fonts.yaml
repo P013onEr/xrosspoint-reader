@@ -42,7 +42,7 @@ families:
     description: "Simplified Chinese UI font (CJK + Latin)"
     profile: ui
     intervals: cjk-ui
-    sizes: [12]
+    sizes: [8, 10, 12]
     styles:
       regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"}
       bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf"}
@@ -51,7 +51,7 @@ families:
     description: "Traditional Chinese UI font (CJK + Latin)"
     profile: ui
     intervals: cjk-ui
-    sizes: [12]
+    sizes: [8, 10, 12]
     styles:
       regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf"}
       bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Bold.otf"}
@@ -60,7 +60,7 @@ families:
     description: "Japanese UI font (CJK + Latin)"
     profile: ui
     intervals: cjk-ui
-    sizes: [12]
+    sizes: [8, 10, 12]
     styles:
       regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf"}
       bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf"}
@@ -69,7 +69,7 @@ families:
     description: "Korean UI font (CJK + Hangul + Latin)"
     profile: ui
     intervals: cjk-ui
-    sizes: [12]
+    sizes: [8, 10, 12]
     styles:
       regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Korean/NotoSansCJKkr-Regular.otf"}
       bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Korean/NotoSansCJKkr-Bold.otf"}

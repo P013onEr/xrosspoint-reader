@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
 
 class GfxRenderer;
 class SdCardFont;
+struct SdCardFontFileInfo;
 struct SdCardFontFamilyInfo;
 
 class SdCardFontManager {
@@ -22,12 +24,18 @@ class SdCardFontManager {
   // Returns true on success.
   bool loadFamily(const SdCardFontFamilyInfo& family, GfxRenderer& renderer, uint8_t fontSizeEnum);
 
+  // Load exact physical point sizes from one family. Used for fixed UI fonts.
+  // Returns true only when every requested size is present and loaded.
+  bool loadFamilyPointSizes(const SdCardFontFamilyInfo& family, GfxRenderer& renderer, const uint8_t* pointSizes,
+                            size_t pointSizeCount);
+
   // Unload everything, unregister from renderer.
   void unloadAll(GfxRenderer& renderer);
 
   // Look up the font ID for the loaded family. Returns 0 if nothing loaded
   // or familyName doesn't match.
   int getFontId(const std::string& familyName) const;
+  int getFontId(const std::string& familyName, uint8_t pointSize) const;
 
   // Get name of currently loaded family (empty if none).
   const std::string& currentFamilyName() const { return loadedFamilyName_; };
@@ -43,6 +51,7 @@ class SdCardFontManager {
     uint8_t size;
   };
   static int computeFontId(uint32_t contentHash, const char* familyName, uint8_t pointSize);
+  bool loadFile(const SdCardFontFamilyInfo& family, const SdCardFontFileInfo& selected, GfxRenderer& renderer);
 
   std::string loadedFamilyName_;
   uint8_t loadedPointSize_ = 0;

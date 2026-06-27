@@ -292,9 +292,9 @@ void setupDisplayAndFonts(bool seamless = false) {
   renderer.insertFont(NOTOSANS_16_FONT_ID, notosans16FontFamily);
   renderer.insertFont(NOTOSANS_18_FONT_ID, notosans18FontFamily);
 #endif  // OMIT_FONTS
-  renderer.insertFont(UI_10_FONT_ID, ui10FontFamily);
-  renderer.insertFont(UI_12_FONT_ID, ui12FontFamily);
-  renderer.insertFont(SMALL_FONT_ID, smallFontFamily);
+  renderer.insertFont(UI_10_BUILTIN_FONT_ID, ui10FontFamily);
+  renderer.insertFont(UI_12_BUILTIN_FONT_ID, ui12FontFamily);
+  renderer.insertFont(SMALL_BUILTIN_FONT_ID, smallFontFamily);
 
   // Discover and load SD card fonts
   sdFontSystem.begin(renderer);

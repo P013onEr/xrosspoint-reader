@@ -80,22 +80,33 @@ ruby -rdigest -e 'puts [
 ].map{|f| Digest::SHA256.hexdigest(File.read(f)).to_i(16) }.sum % (2 ** 32) - (2 ** 31)'
 ))"
 
-echo "#define UI_10_FONT_ID ($(
-ruby -rdigest -e 'puts [
-  "./ubuntu_10_regular.h",
-  "./ubuntu_10_bold.h",
-].map{|f| Digest::SHA256.hexdigest(File.read(f)).to_i(16) }.sum % (2 ** 32) - (2 ** 31)'
-))"
+# Preserve the historical UI font IDs so existing font caches and code paths
+# continue to identify the built-in UI fonts consistently.
+echo "#define UI_10_BUILTIN_FONT_ID (22918846)"
+echo "#define UI_12_BUILTIN_FONT_ID (1635686837)"
+echo "#define SMALL_BUILTIN_FONT_ID (674098198)"
 
-echo "#define UI_12_FONT_ID ($(
-ruby -rdigest -e 'puts [
-  "./ubuntu_12_regular.h",
-  "./ubuntu_12_bold.h",
-].map{|f| Digest::SHA256.hexdigest(File.read(f)).to_i(16) }.sum % (2 ** 32) - (2 ** 31)'
-))"
-
-echo "#define SMALL_FONT_ID ($(
-ruby -rdigest -e 'puts [
-  "./notosans_8_regular.h",
-].map{|f| Digest::SHA256.hexdigest(File.read(f)).to_i(16) }.sum % (2 ** 32) - (2 ** 31)'
-))"
+echo ""
+echo "namespace UiFonts {"
+echo "int getUi10FontId();"
+echo "int getUi12FontId();"
+echo "int getSmallFontId();"
+echo "}  // namespace UiFonts"
+echo ""
+echo "#define UI_10_FONT_ID (UiFonts::getUi10FontId())"
+echo "#define UI_12_FONT_ID (UiFonts::getUi12FontId())"
+echo "#define SMALL_FONT_ID (UiFonts::getSmallFontId())"
+echo ""
+echo "// Font ID 0 is reserved as the \"not found\" sentinel."
+echo "// Guard against any hash accidentally producing 0."
+echo "static_assert(NOTOSERIF_12_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSERIF_14_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSERIF_16_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSERIF_18_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSANS_12_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSANS_14_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSANS_16_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(NOTOSANS_18_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(UI_10_BUILTIN_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(UI_12_BUILTIN_FONT_ID != 0, \"Font ID collision with sentinel\");"
+echo "static_assert(SMALL_BUILTIN_FONT_ID != 0, \"Font ID collision with sentinel\");"

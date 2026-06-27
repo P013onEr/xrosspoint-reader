@@ -1,9 +1,11 @@
 #include "SdCardFontSystem.h"
 
 #include <GfxRenderer.h>
+#include <I18n.h>
 #include <Logging.h>
 
 #include "CrossPointSettings.h"
+#include "UiFonts.h"
 
 namespace {
 
@@ -11,6 +13,22 @@ static uint8_t fontSizeEnumFromSettings() {
   uint8_t e = SETTINGS.fontSize;
   if (e >= CrossPointSettings::FONT_SIZE_COUNT) e = 1;  // default to MEDIUM
   return e;
+}
+
+const char* uiFamilyForLanguage(Language lang) {
+  switch (lang) {
+    case Language::ZH_CN:
+      return "NotoSansCJKscUI";
+    case Language::ZH_TW:
+      return "NotoSansCJKtcUI";
+    case Language::JA:
+      return "NotoSansCJKjpUI";
+    case Language::KO:
+      return "NotoSansCJKkrUI";
+    case Language::EN:
+    default:
+      return nullptr;
+  }
 }
 
 }  // namespace
@@ -24,6 +42,8 @@ void SdCardFontSystem::begin(GfxRenderer& renderer) {
     return static_cast<SdCardFontSystem*>(ctx)->resolveFontId(familyName, fontSizeEnum);
   };
   SETTINGS.sdFontResolverCtx = this;
+
+  ensureUiLoaded(renderer);
 
   // If user has a saved SD font selection, load it
   if (SETTINGS.sdFontFamilyName[0] != '\0') {
@@ -54,6 +74,8 @@ void SdCardFontSystem::ensureLoaded(GfxRenderer& renderer) {
     LOG_DBG("SDFS", "Registry dirty — re-discovering fonts");
     registry_.discover();
   }
+
+  ensureUiLoaded(renderer);
 
   const char* wantedFamily = SETTINGS.sdFontFamilyName;
   const std::string& currentFamily = manager_.currentFamilyName();
@@ -101,6 +123,42 @@ void SdCardFontSystem::ensureLoaded(GfxRenderer& renderer) {
     LOG_DBG("SDFS", "SD font family not found: %s (clearing)", wantedFamily);
     SETTINGS.sdFontFamilyName[0] = '\0';
   }
+}
+
+void SdCardFontSystem::ensureUiLoaded(GfxRenderer& renderer) {
+  const char* wantedFamily = uiFamilyForLanguage(I18N.getLanguage());
+  const std::string& currentFamily = uiManager_.currentFamilyName();
+
+  if (!wantedFamily || wantedFamily[0] == '\0') {
+    if (!currentFamily.empty()) {
+      uiManager_.unloadAll(renderer);
+    }
+    UiFonts::clearActiveCjkFontIds();
+    return;
+  }
+
+  if (currentFamily == wantedFamily) return;
+
+  if (!currentFamily.empty()) {
+    uiManager_.unloadAll(renderer);
+  }
+  UiFonts::clearActiveCjkFontIds();
+
+  const auto* family = registry_.findFamily(wantedFamily);
+  if (!family) {
+    LOG_DBG("SDFS", "CJK UI font family not found: %s", wantedFamily);
+    return;
+  }
+
+  static constexpr uint8_t kUiPointSizes[] = {8, 10, 12};
+  if (!uiManager_.loadFamilyPointSizes(*family, renderer, kUiPointSizes, sizeof(kUiPointSizes))) {
+    LOG_ERR("SDFS", "Failed to load CJK UI font family: %s", wantedFamily);
+    return;
+  }
+
+  UiFonts::setActiveCjkFontIds(uiManager_.getFontId(wantedFamily, 8), uiManager_.getFontId(wantedFamily, 10),
+                               uiManager_.getFontId(wantedFamily, 12));
+  LOG_DBG("SDFS", "Loaded CJK UI font family: %s", wantedFamily);
 }
 
 int SdCardFontSystem::resolveFontId(const char* familyName, uint8_t /*fontSizeEnum*/) const {

@@ -120,7 +120,7 @@ You can also specify arbitrary Unicode ranges directly:
 The repository font config separates generated fonts by profile:
 
 - `reader` — selectable reading fonts, usually generated at multiple sizes
-- `ui` — fixed-size UI fonts used by firmware UI rendering
+- `ui` — fixed-size UI fonts used by firmware UI rendering, currently 8/10/12 pt
 
 Build only reading fonts:
 

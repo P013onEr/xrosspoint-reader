@@ -22,6 +22,11 @@ class SdCardFontSystem {
   /// Also re-discovers if the registry has been marked dirty (e.g. by web upload).
   void ensureLoaded(GfxRenderer& renderer);
 
+  /// Ensure the fixed UI font family for the current language is loaded.
+  /// English uses built-in UI fonts; CJK languages use matching SD card UI fonts
+  /// when installed.
+  void ensureUiLoaded(GfxRenderer& renderer);
+
   /// Resolve an SD card font ID from family name + fontSize enum.
   /// Returns 0 if not found. Used by CrossPointSettings::getReaderFontId().
   int resolveFontId(const char* familyName, uint8_t fontSizeEnum) const;
@@ -48,6 +53,7 @@ class SdCardFontSystem {
  private:
   SdCardFontRegistry registry_;
   SdCardFontManager manager_;
+  SdCardFontManager uiManager_;
   std::atomic<bool> registryDirty_{false};
 };
 
