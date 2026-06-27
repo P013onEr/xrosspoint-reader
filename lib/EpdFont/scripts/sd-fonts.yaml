@@ -15,6 +15,7 @@
 #   force_autohint: (optional) Force FreeType auto-hinter instead of native hinting
 #   styles:      Map of style name -> font source
 #                  path: relative to lib/EpdFont (for committed fonts)
+#                  root_path: relative to the repository root (for local fonts)
 #                  url:  download URL (for fonts not in the repo)
 #
 # Variable fonts:
@@ -76,41 +77,13 @@ families:
 
   # ── CJK Reading ────────────────────────────────────────────────────────
 
-  - name: NotoSansCJKsc
-    description: "Simplified Chinese reading font (CJK + Latin)"
+  - name: LXGWNeoXiHeiPlus
+    description: "LXGW Neo XiHei Plus reading font (CJK + Latin)"
     profile: reader
     intervals: cjk-reading
     sizes: [12, 14, 16, 18]
     styles:
-      regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"}
-      bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf"}
-
-  - name: NotoSansCJKtc
-    description: "Traditional Chinese reading font (CJK + Latin)"
-    profile: reader
-    intervals: cjk-reading
-    sizes: [12, 14, 16, 18]
-    styles:
-      regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf"}
-      bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/TraditionalChinese/NotoSansCJKtc-Bold.otf"}
-
-  - name: NotoSansCJKjp
-    description: "Japanese reading font (CJK + Latin)"
-    profile: reader
-    intervals: cjk-reading
-    sizes: [12, 14, 16, 18]
-    styles:
-      regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf"}
-      bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf"}
-
-  - name: NotoSansCJKkr
-    description: "Korean reading font (CJK + Hangul + Latin)"
-    profile: reader
-    intervals: cjk-reading
-    sizes: [12, 14, 16, 18]
-    styles:
-      regular: {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Korean/NotoSansCJKkr-Regular.otf"}
-      bold:    {url: "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Korean/NotoSansCJKkr-Bold.otf"}
+      regular: {root_path: "LXGWNeoXiHeiPlus.ttf"}
 
   # ── Serif ──────────────────────────────────────────────────────────────
 

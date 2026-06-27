@@ -135,6 +135,16 @@ The CJK presets are:
 - `cjk-ui` — Basic Latin, CJK punctuation, kana, Hangul, CJK ideographs, compatibility ideographs, and fullwidth forms
 - `cjk-reading` — `cjk-ui` plus built-in Latin/European coverage and common ebook symbol blocks
 
+The CJK reading font configured for this branch is `LXGWNeoXiHeiPlus`. Put
+`LXGWNeoXiHeiPlus.ttf` at the repository root, then generate the simulator SD
+card files with:
+
+    python3 lib/EpdFont/scripts/build-sd-fonts.py \
+      --only LXGWNeoXiHeiPlus \
+      --output-dir fs_/.fonts
+
+The source TTF is intentionally ignored by git; only the build rule is tracked.
+
 To list all presets with codepoint counts:
 
     python3 lib/EpdFont/scripts/fontconvert_sdcard.py --list-presets

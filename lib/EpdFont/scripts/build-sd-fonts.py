@@ -42,6 +42,7 @@ import yaml
 SCRIPT_DIR = Path(__file__).parent
 FONTCONVERT = SCRIPT_DIR / "fontconvert_sdcard.py"
 EPDFONTS_DIR = SCRIPT_DIR.parent  # lib/EpdFont
+REPO_ROOT = EPDFONTS_DIR.parent.parent
 DEFAULT_CONFIG = SCRIPT_DIR / "sd-fonts.yaml"
 DEFAULT_OUTPUT = SCRIPT_DIR / "output"
 DOWNLOAD_DIR = SCRIPT_DIR / "downloaded_fonts"
@@ -132,6 +133,12 @@ def resolve_font_path(style_spec: dict, family_name: str, style_name: str) -> Pa
         resolved = EPDFONTS_DIR / style_spec["path"]
         if not resolved.exists():
             raise FileNotFoundError(f"{family_name}/{style_name}: {resolved} not found")
+    elif "root_path" in style_spec:
+        resolved = REPO_ROOT / style_spec["root_path"]
+        if not resolved.exists():
+            raise FileNotFoundError(
+                f"{family_name}/{style_name}: {resolved} not found; place the local source font there"
+            )
     elif "url" in style_spec:
         url = style_spec["url"]
         # Derive a stable filename from the URL
@@ -139,7 +146,7 @@ def resolve_font_path(style_spec: dict, family_name: str, style_name: str) -> Pa
         dest = DOWNLOAD_DIR / family_name / filename
         resolved = download_font(url, dest)
     else:
-        raise ValueError(f"{family_name}/{style_name}: must have 'path' or 'url'")
+        raise ValueError(f"{family_name}/{style_name}: must have 'path', 'root_path', or 'url'")
 
     # If variable font axes are specified, extract a static instance
     if "variable" in style_spec:
