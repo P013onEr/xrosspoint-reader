@@ -31,6 +31,13 @@ const char* uiFamilyForLanguage(Language lang) {
   }
 }
 
+static constexpr const char* kLanguagePickerUiFamilies[] = {
+    "NotoSansCJKscUI",
+    "NotoSansCJKtcUI",
+    "NotoSansCJKjpUI",
+    "NotoSansCJKkrUI",
+};
+
 }  // namespace
 
 void SdCardFontSystem::begin(GfxRenderer& renderer) {
@@ -126,7 +133,27 @@ void SdCardFontSystem::ensureLoaded(GfxRenderer& renderer) {
 }
 
 void SdCardFontSystem::ensureUiLoaded(GfxRenderer& renderer) {
-  const char* wantedFamily = uiFamilyForLanguage(I18N.getLanguage());
+  loadUiFamily(renderer, uiFamilyForLanguage(I18N.getLanguage()));
+}
+
+void SdCardFontSystem::ensureLanguagePickerUiLoaded(GfxRenderer& renderer) {
+  const char* currentLanguageFamily = uiFamilyForLanguage(I18N.getLanguage());
+  if (currentLanguageFamily) {
+    loadUiFamily(renderer, currentLanguageFamily);
+    return;
+  }
+
+  for (const char* familyName : kLanguagePickerUiFamilies) {
+    if (registry_.findFamily(familyName)) {
+      loadUiFamily(renderer, familyName);
+      return;
+    }
+  }
+
+  loadUiFamily(renderer, nullptr);
+}
+
+bool SdCardFontSystem::loadUiFamily(GfxRenderer& renderer, const char* wantedFamily) {
   const std::string& currentFamily = uiManager_.currentFamilyName();
 
   if (!wantedFamily || wantedFamily[0] == '\0') {
@@ -134,10 +161,10 @@ void SdCardFontSystem::ensureUiLoaded(GfxRenderer& renderer) {
       uiManager_.unloadAll(renderer);
     }
     UiFonts::clearActiveCjkFontIds();
-    return;
+    return false;
   }
 
-  if (currentFamily == wantedFamily) return;
+  if (currentFamily == wantedFamily) return true;
 
   if (!currentFamily.empty()) {
     uiManager_.unloadAll(renderer);
@@ -147,18 +174,19 @@ void SdCardFontSystem::ensureUiLoaded(GfxRenderer& renderer) {
   const auto* family = registry_.findFamily(wantedFamily);
   if (!family) {
     LOG_DBG("SDFS", "CJK UI font family not found: %s", wantedFamily);
-    return;
+    return false;
   }
 
   static constexpr uint8_t kUiPointSizes[] = {8, 10, 12};
   if (!uiManager_.loadFamilyPointSizes(*family, renderer, kUiPointSizes, sizeof(kUiPointSizes))) {
     LOG_ERR("SDFS", "Failed to load CJK UI font family: %s", wantedFamily);
-    return;
+    return false;
   }
 
   UiFonts::setActiveCjkFontIds(uiManager_.getFontId(wantedFamily, 8), uiManager_.getFontId(wantedFamily, 10),
                                uiManager_.getFontId(wantedFamily, 12));
   LOG_DBG("SDFS", "Loaded CJK UI font family: %s", wantedFamily);
+  return true;
 }
 
 int SdCardFontSystem::resolveFontId(const char* familyName, uint8_t /*fontSizeEnum*/) const {

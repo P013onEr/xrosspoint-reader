@@ -14,6 +14,7 @@
 
 void LanguageSelectActivity::onEnter() {
   Activity::onEnter();
+  sdFontSystem.ensureLanguagePickerUiLoaded(renderer);
 
   // Set current selection based on current language
   const auto currentLang = static_cast<uint8_t>(I18N.getLanguage());
@@ -25,7 +26,10 @@ void LanguageSelectActivity::onEnter() {
   requestUpdate();
 }
 
-void LanguageSelectActivity::onExit() { Activity::onExit(); }
+void LanguageSelectActivity::onExit() {
+  sdFontSystem.ensureUiLoaded(renderer);
+  Activity::onExit();
+}
 
 void LanguageSelectActivity::loop() {
   if (mappedInput.wasPressed(MappedInputManager::Button::Back)) {

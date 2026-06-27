@@ -27,6 +27,10 @@ class SdCardFontSystem {
   /// when installed.
   void ensureUiLoaded(GfxRenderer& renderer);
 
+  /// Ensure a CJK-capable UI font is active for the language picker so language
+  /// names remain visible even when the current language is English.
+  void ensureLanguagePickerUiLoaded(GfxRenderer& renderer);
+
   /// Resolve an SD card font ID from family name + fontSize enum.
   /// Returns 0 if not found. Used by CrossPointSettings::getReaderFontId().
   int resolveFontId(const char* familyName, uint8_t fontSizeEnum) const;
@@ -51,6 +55,8 @@ class SdCardFontSystem {
   }
 
  private:
+  bool loadUiFamily(GfxRenderer& renderer, const char* wantedFamily);
+
   SdCardFontRegistry registry_;
   SdCardFontManager manager_;
   SdCardFontManager uiManager_;
