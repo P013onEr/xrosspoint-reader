@@ -76,6 +76,15 @@ bool SdCardFontFamilyInfo::hasSize(uint8_t size) const {
   return false;
 }
 
+bool SdCardFontFamilyInfo::isUiFamily() const {
+  static constexpr char kUiSuffix[] = "UI";
+  const size_t suffixLen = sizeof(kUiSuffix) - 1;
+  if (name.size() < suffixLen || name.compare(name.size() - suffixLen, suffixLen, kUiSuffix) != 0) {
+    return false;
+  }
+  return hasSize(8) && hasSize(10) && hasSize(12);
+}
+
 std::vector<uint8_t> SdCardFontFamilyInfo::availableSizes() const {
   std::vector<uint8_t> sizes;
   for (const auto& f : files) {

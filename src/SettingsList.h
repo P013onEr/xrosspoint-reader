@@ -19,19 +19,22 @@
 inline SettingInfo buildFontFamilySetting(const SdCardFontRegistry* registry) {
   // Built-in font labels (StrId)
   std::vector<StrId> enumValues = {StrId::STR_NOTO_SERIF, StrId::STR_NOTO_SANS};
-  // Runtime string labels for SD card fonts
-  std::vector<std::string> enumStringValues;
 
-  // Reserve: first CrossPointSettings::BUILTIN_FONT_COUNT entries use StrId, rest use strings
+  // Runtime string labels for SD card reader fonts. UI-only families stay in
+  // the registry for language/UI rendering, but are not selectable as reader fonts.
+  std::vector<std::string> sdFamilyNames;
   if (registry) {
     const auto& families = registry->getFamilies();
-    enumStringValues.reserve(families.size());
-    std::transform(families.begin(), families.end(), std::back_inserter(enumStringValues),
-                   [](const SdCardFontFamilyInfo& f) { return f.name; });
+    sdFamilyNames.reserve(families.size());
+    for (const auto& family : families) {
+      if (!family.isUiFamily()) {
+        sdFamilyNames.push_back(family.name);
+      }
+    }
   }
 
   // Capture the SD font count for the lambdas
-  const int sdFontCount = static_cast<int>(enumStringValues.size());
+  const int sdFontCount = static_cast<int>(sdFamilyNames.size());
 
   // Total option count = built-in + SD card families
   // For the combined enumStringValues: we need all entries as strings (built-in names + SD names)
@@ -41,7 +44,7 @@ inline SettingInfo buildFontFamilySetting(const SdCardFontRegistry* registry) {
   if (sdFontCount > 0) {
     allStringValues.push_back(I18N.get(StrId::STR_NOTO_SERIF));
     allStringValues.push_back(I18N.get(StrId::STR_NOTO_SANS));
-    allStringValues.insert(allStringValues.end(), enumStringValues.begin(), enumStringValues.end());
+    allStringValues.insert(allStringValues.end(), sdFamilyNames.begin(), sdFamilyNames.end());
   }
 
   SettingInfo s;
@@ -51,15 +54,6 @@ inline SettingInfo buildFontFamilySetting(const SdCardFontRegistry* registry) {
   s.enumStringValues = std::move(allStringValues);
   s.key = "fontFamily";
   s.category = StrId::STR_CAT_READER;
-
-  // Capture registry families by copy for the lambdas
-  std::vector<std::string> sdFamilyNames;
-  if (registry) {
-    const auto& families = registry->getFamilies();
-    sdFamilyNames.reserve(families.size());
-    std::transform(families.begin(), families.end(), std::back_inserter(sdFamilyNames),
-                   [](const SdCardFontFamilyInfo& f) { return f.name; });
-  }
 
   s.valueGetter = [sdFamilyNames]() -> uint8_t {
     // If an SD card font is selected, find its index

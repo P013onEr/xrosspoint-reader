@@ -31,6 +31,9 @@ class FontSelectionActivity final : public Activity {
     uint8_t settingIndex;
   };
 
+  int findFontIndex(const char* sdFontFamilyName, uint8_t fontFamily) const;
+  void applyPreviewFont(const FontEntry& font);
+
   const SdCardFontRegistry* registry_;
   ButtonNavigator buttonNavigator_;
   std::vector<FontEntry> fonts_;
